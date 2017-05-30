@@ -1,0 +1,23 @@
+# Vim
+*.swp
+
+# Python
+__pycache__/
+venv/
+*.pyc
+
+# Javascript
+node_modules/
+build/
+npm-debug.log
+.eslintcache
+
+# Database
+*.db
+migrations
+
+*.log
+*.pot
+.gitignore
+local_settings.py/
+.DS_Store

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}To-do List{% endblock %}</title>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/jquery.js"></script>
+    {% block extra_head %}
+
+    <style>
+    body {padding-top: 40px;}
+    .ftodo{text-decoration : line-through ; }
+    textarea{ width: 97%;
+        padding: 5px;
+        font-size: 14px;
+        resize: vertical;}
+        </style>
+
+        <script type="text/javascript">
+        $(document).ready(function() {
+            $('#btnToggleCompleted').click(function() {
+                if (document.getElementById("completedList").style.display === 'none'){
+                    document.getElementById("completedList").style.display = "table-row";
+                } else{
+                    document.getElementById("completedList").style.display = "none";
+                }
+            });
+        });
+        </script>
+
+        <script type="text/javascript">
+        function sendTodo(){
+            $('#myModal form').submit(function(){
+                $.ajax({
+                    type: "POST",
+                    data: $('#myModal form').serialize(),
+                    url: "{% url "add" %}",
+                    cache: false,
+                    dataType: "html",
+                    success: function(html, textStatus) {
+                        $('#todo').replaceWith(html);
+                        $('#myModal').modal('hide');
+                        $('#myModal form')[0].reset();
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        $('#comment_form form').replaceWith('Addition failed!');
+                    }
+                });
+                return false;
+            });
+        }
+        $(document).ready(function(){
+            sendTodo();
+        })
+        </script>
+
+        {% endblock %}
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <div id="todo" class="well">
+                        {% block todo %}
+                        <table class="table table-hover">
+                            <thead>
+                                <h3>To-do List by Shaolin Zhang</h3>
+                            </thead>
+
+                            <colgroup>
+                                <col style="width:5%">
+                                <col style="width:5%">
+                                <col style="width:5%">
+                                <col style="width:55%">
+                                <col style="width:30%">
+                            </colgroup>
+
+                            <tbody>
+                                <tr>
+                                    <th>Toggle</th>
+                                    <th>Edit</th>
+                                    <th>Delete</th>
+                                    <th>Task Content</th>
+                                    <th>Create Time</th>
+                                </tr>
+                                {% for todo in todolist %}
+                                {% if todo.todoPriority == '1' %}
+                                <tr class='error'>
+                                    {% endif %}
+                                    {% if todo.todoPriority == '2' %}
+                                    <tr class='warning'>
+                                        {% endif %}
+                                        {% if todo.todoPriority == '3' %}
+                                        <tr class='info'>
+                                            {% endif %}
+                                            <td class="te">
+                                                <div class="span1">
+                                                    <a href="{% url "finish" todo.id %}" title="Mark as Done"><i class=" icon-ok"></i></a>
+                                                </div>
+                                            </td>
+                                            <td class="te">
+                                                <div class="span1">
+                                                    <a href="{% url "update" todo.id %}" title="Edit Details"><i class="icon-edit"></i></a>
+                                                </div>
+                                            </td>
+                                            <td class="te">
+                                                <div class="span1">
+                                                    <a href="{% url "delete" todo.id %}" title="Delete Task"><i class="icon-trash"></i></a>
+                                                </div>
+                                            </td>
+                                            <td class="todo">{{ todo.todo }}</td>
+                                            <td class="todoTime">{{ todo.postTime }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% for ftodo in finishtodos %}
+                                        <tr class='success' id="completedList" style="display:table-row;">
+                                            <td class="te">
+                                                <div class="span2">
+                                                    <a href="{% url "rollback" ftodo.id %}" title="Mark as Working"><i class=" icon-repeat"></i></a>
+                                                </div>
+                                            </td>
+                                            <td class="te">
+                                                <div class="span2">
+                                                    <a href="{% url "update" ftodo.id %}" title="Edit Details"><i class="icon-edit"></i></a>
+                                                </div>
+                                            </td>
+                                            <td class="te">
+                                                <div class="span2">
+                                                    <a href="{% url "delete" ftodo.id %}" title="Delete Task"><i class="icon-trash"></i></a>
+                                                </div>
+                                            </td>
+                                            <td class="ftodo muted">{{ ftodo.todo }}</td>
+                                            <td class="ftodoTime">{{ ftodo.postTime }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <a class="btn btn-success" href="#myModal" role="button" data-toggle="modal">
+                                    <span>Add Task</span>
+                                </a>
+                                <a class="btn btn-success" id="btnToggleCompleted" role="button">
+                                    <span>Toggle Completed Task</span>
+                                </a>
+                                {% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal hide fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h3 id="myModalLabel">Add Task</h3>
+                    </div>
+                    <form action="" method="post">{% csrf_token %}
+                        <div class="modal-body">
+                            <textarea name="todo" class="txtodo" id="txtodo" required="required">{{ todo.todo }}</textarea>
+                            <fieldset>
+                                <label class="radio inline" for="todoPriority">
+                                    <span>Set Priority</span>
+                                </label>
+                                <label class="radio inline" for="todoPriority">
+                                    <input type="radio" name="priority" value="1"/>
+                                    <span class="label label-important">Urgent</span>
+                                </label>
+                                <label class="radio inline" for="todoPriority">
+                                    <input type="radio" name="priority" value="2"/>
+                                    <span class="label label-warning">Important</span>
+                                </label>
+                                <label class="radio inline" for="todoPriority">
+                                    <input type="radio" name="priority" value="3"/>
+                                    <span class="label label-success">Normal</span>
+                                </label>
+                            </fieldset>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn"  data-dismiss="modal" aria-hidden="true">Close</button>
+                            <button id="send" class="btn btn-success" type="submit" name="submit" >Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+                <script src="/static/js/bootstrap.min.js"></script>
+            </body>
+            </html>

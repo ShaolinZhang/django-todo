@@ -1,0 +1,32 @@
+{% extends 'todolist/index.html'%}
+
+{% block title %} update Todo {% endblock %}
+
+{% block todo %}
+    <form action="{% url 'update' todo.id %}" method="post">{% csrf_token %}
+        <div class="modal-body">
+            <textarea name="todo" class="txtodo" id="txtodo" required="required">{{ todo.todo }}</textarea>
+            <fieldset>
+                <label class="radio inline" for="todoPriority">
+                    <span>Set Priority</span>
+                </label>
+                <label class="radio inline" for="todoPriority">
+                    <input type="radio" name="priority" value="1" {% if todo.todoPriority == '1' %} checked{% endif %}/>
+                    <span class="label label-important">Urgent</span>
+                </label>
+                <label class="radio inline" for="todoPriority">
+                    <input type="radio" name="priority" value="2" {% if todo.todoPriority == '2' %} checked{% endif %}/>
+                    <span class="label label-warning">Important</span>
+                </label>
+                <label class="radio inline" for="todoPriority">
+                    <input type="radio" name="priority" value="3" {% if todo.todoPriority == '3' %} checked{% endif %}/>
+                    <span class="label label-success">Normal</span>
+                </label>
+            </fieldset>
+        </div>
+        <div class="modal-footer">
+            <button class="btn"  data-dismiss="modal" aria-hidden="true">Close</button>
+            <button id="send" class="btn btn-success" type="submit" name="submit">Save Changes</button>
+        </div>
+        </form>
+{% endblock %}
